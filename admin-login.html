@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 1rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-button:hover {
+            background: #0056b3;
+        }
+
+        #adminLoginStatus {
+            text-align: center;
+            color: #dc3545;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Admin Login</h2>
+        <div class="input-group">
+            <input type="text" id="adminUsername" placeholder="Username" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="adminPassword" placeholder="Password" required>
+        </div>
+        <button onclick="adminLogin()" type="button" class="login-button">Sign In</button>
+        <p id="adminLoginStatus"></p>
+    </div>    <script>
+        console.log('JS loaded');
+        
+        async function adminLogin() {
+            console.log('adminLogin called');
+            
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            // Show what we're sending
+            console.log('Attempting login with:', { username });
+            
+            if (!username || !password) {
+                document.getElementById('adminLoginStatus').textContent = 'Please enter both username and password';
+                return;
+            }
+
+            try {
+                console.log('Making fetch request to /auth/admin-login...');                const res = await fetch('https://clipsback-production.up.railway.app/auth/admin-login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username.trim(),
+                        password: password
+                    })
+                });
+
+                console.log('Response status:', res.status);
+                const data = await res.json();
+                console.log('Response data:', data);
+
+                if (data.token) {
+                    console.log('Login successful, storing token...');
+                    localStorage.setItem('adminToken', data.token);
+                    console.log('Redirecting to dashboard...');
+                    window.location.href = 'admin-dashboard.html';
+                } else {
+                    console.log('Login failed:', data.error);
+                    document.getElementById('adminLoginStatus').textContent = data.error || 'Login failed';
+                }
+            } catch (err) {
+                console.error('Network error:', err);
+                document.getElementById('adminLoginStatus').textContent = 'Network error. Please try again';
+            }
+        }
+    </script>
+</body>
+</html>
